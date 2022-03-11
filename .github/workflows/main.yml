@@ -150,6 +150,12 @@ jobs:
           timeout_minutes: 5
           max_attempts: 5
           command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libsdl2-image-2.0-0
+      - name: Install MacOS Dependencies
+        if: runner.os == 'macOS'
+        run: brew install sdl2_image
 
       # Execution
       - name: Execute Tests
