@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace FFI\Headers\SDL2Image\Tests\BinaryCompatibilityTestCase;
 
+use FFI\Headers\Bass\Tests\BinaryCompatibilityTestCase\DownloaderResult;
+use PHPUnit\Framework\Assert;
+
 class Downloader
 {
     /**
@@ -51,10 +54,25 @@ class Downloader
      * @param string $url
      * @param array $args
      * @return DownloaderResult
+     * @throws \Throwable
      */
     public static function download(string $url, array $args = []): DownloaderResult
     {
-        $archive = self::archive(\vsprintf($url, $args));
+        $url = \vsprintf($url, $args);
+
+        try {
+            $archive = self::archive($url);
+        } catch (\Throwable $e) {
+            if (\str_contains($e->getMessage(), 'Operation timed out')) {
+                Assert::markTestIncomplete('Can not complete test: Downloading operation timed out');
+            }
+
+            if (\str_contains($e->getMessage(), '404')) {
+                Assert::markTestSkipped('Can not complete test: ' . $url . ' not found');
+            }
+
+            throw $e;
+        }
 
         return new DownloaderResult($archive);
     }
