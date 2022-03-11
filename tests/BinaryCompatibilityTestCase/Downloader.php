@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace FFI\Headers\SDL2Image\Tests\BinaryCompatibilityTestCase;
 
-use FFI\Headers\Bass\Tests\BinaryCompatibilityTestCase\DownloaderResult;
 use PHPUnit\Framework\Assert;
 
 class Downloader
