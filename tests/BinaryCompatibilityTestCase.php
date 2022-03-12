@@ -11,10 +11,9 @@ declare(strict_types=1);
 
 namespace FFI\Headers\SDL2Image\Tests;
 
-use FFI\Env\Runtime;
 use FFI\Headers\SDL2Image;
-use FFI\Headers\SDL2Image\Tests\BinaryCompatibilityTestCase\Downloader;
 use FFI\Headers\SDL2Image\Version;
+use FFI\Headers\Testing\Downloader;
 use FFI\Location\Locator;
 
 class BinaryCompatibilityTestCase extends TestCase
@@ -29,14 +28,14 @@ class BinaryCompatibilityTestCase extends TestCase
     public function testWindowsBinaryCompatibility(Version $version): void
     {
         if (!\is_file(self::DIR_STORAGE . '/SDL2.dll')) {
-            Downloader::download(\vsprintf('https://www.libsdl.org/release/SDL2-2.0.10-win32-x64.zip', [
+            Downloader::zip(\vsprintf('https://www.libsdl.org/release/SDL2-2.0.10-win32-x64.zip', [
                 $version->toString()
             ]))
                 ->extract('SDL2.dll', self::DIR_STORAGE . '/SDL2.dll');
         }
 
         if (!\is_file(self::DIR_STORAGE . '/SDL2_image.dll')) {
-            Downloader::download('https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5-win32-x64.zip')
+            Downloader::zip('https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5-win32-x64.zip')
                 ->extract('SDL2_image.dll', self::DIR_STORAGE . '/SDL2_image.dll');
         }
 
