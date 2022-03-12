@@ -56,15 +56,10 @@ class BinaryCompatibilityTestCase extends TestCase
             $this->markTestSkipped('sdl2_image not installed');
         }
 
-        $headers = (string)SDL2Image::create($version);
-
-        try {
-            \FFI::cdef($headers, Locator::resolve('libSDL2_image-2.0.0.dylib'));
-        } catch (\FFI\ParserException $e) {
-            $this->dumpExceptionInfo($e, $headers);
-
-            throw $e;
-        }
+        $this->assertHeadersCompatibleWith(
+            SDL2Image::create($version),
+            Locator::resolve('libSDL2_image-2.0.0.dylib')
+        );
     }
 
     /**
@@ -78,14 +73,9 @@ class BinaryCompatibilityTestCase extends TestCase
             $this->markTestSkipped('sdl2_image not installed');
         }
 
-        $headers = (string)SDL2Image::create($version);
-
-        try {
-            \FFI::cdef($headers, Locator::resolve('libSDL2_image-2.0.so.0'));
-        } catch (\FFI\ParserException $e) {
-            $this->dumpExceptionInfo($e, $headers);
-
-            throw $e;
-        }
+        $this->assertHeadersCompatibleWith(
+            SDL2Image::create($version),
+            Locator::resolve('libSDL2_image-2.0.so.0')
+        );
     }
 }
