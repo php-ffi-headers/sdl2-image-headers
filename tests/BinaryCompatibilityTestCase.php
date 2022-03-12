@@ -17,22 +17,9 @@ use FFI\Headers\SDL2Image\Tests\BinaryCompatibilityTestCase\Downloader;
 use FFI\Headers\SDL2Image\Version;
 use FFI\Location\Locator;
 
-/**
- * @group binary-compatibility
- * @requires extension ffi
- */
 class BinaryCompatibilityTestCase extends TestCase
 {
     private const DIR_STORAGE = __DIR__ . '/storage';
-
-    public function setUp(): void
-    {
-        if (!Runtime::isAvailable()) {
-            $this->markTestSkipped('An ext-ffi extension must be available and enabled');
-        }
-
-        parent::setUp();
-    }
 
     /**
      * @requires OSFAMILY Windows
@@ -41,8 +28,6 @@ class BinaryCompatibilityTestCase extends TestCase
      */
     public function testWindowsBinaryCompatibility(Version $version): void
     {
-        $this->expectNotToPerformAssertions();
-
         if (!\is_file(self::DIR_STORAGE . '/SDL2.dll')) {
             Downloader::download(\vsprintf('https://www.libsdl.org/release/SDL2-2.0.10-win32-x64.zip', [
                 $version->toString()
@@ -55,16 +40,10 @@ class BinaryCompatibilityTestCase extends TestCase
                 ->extract('SDL2_image.dll', self::DIR_STORAGE . '/SDL2_image.dll');
         }
 
-        $headers = (string)SDL2Image::create($version);
-
-        try {
-            \chdir(self::DIR_STORAGE);
-            \FFI::cdef($headers, self::DIR_STORAGE . '/SDL2_image.dll');
-        } catch (\FFI\ParserException $e) {
-            $this->dumpExceptionInfo($e, $headers);
-
-            throw $e;
-        }
+        $this->assertHeadersCompatibleWith(
+            SDL2Image::create($version),
+            self::DIR_STORAGE . '/SDL2_image.dll'
+        );
     }
 
     /**
@@ -108,25 +87,6 @@ class BinaryCompatibilityTestCase extends TestCase
             $this->dumpExceptionInfo($e, $headers);
 
             throw $e;
-        }
-    }
-
-    /**
-     * @dataProvider configDataProvider
-     */
-    public function testCompilation(Version $version): void
-    {
-        $headers = (string)SDL2Image::create($version);
-
-        try {
-            \FFI::cdef($headers);
-            $this->expectNotToPerformAssertions();
-        } catch (\FFI\Exception $e) {
-            $this->assertStringStartsWith('Failed resolving C function', $e->getMessage());
-
-            if ($e instanceof \FFI\ParserException) {
-                $this->dumpExceptionInfo($e, $headers);
-            }
         }
     }
 }

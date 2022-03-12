@@ -27,4 +27,17 @@ final class ContentRenderingTestCase extends TestCase
 
         (string)SDL2Image::create($version);
     }
+
+    /**
+     * @testdox Tests that header has correct PHP FFI syntax
+     *
+     * @depends testRenderable
+     * @dataProvider configDataProvider
+     */
+    public function testCompilation(Version $version): void
+    {
+        $this->assertHeadersSyntaxValid(
+            SDL2Image::create($version)
+        );
+    }
 }
