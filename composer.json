@@ -40,8 +40,7 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "composer/package-versions-deprecated": true,
-            "phing/phing-composer-configurator": false
+            "composer/package-versions-deprecated": true
         }
     },
     "provide": {
