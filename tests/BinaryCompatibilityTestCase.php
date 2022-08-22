@@ -65,6 +65,10 @@ class BinaryCompatibilityTestCase extends TestCase
         }
 
         $binary = self::DIR_STORAGE . '/SDL2_image.dll';
+
+        // Set LoadLibrary linker directory
+        \chdir(\dirname($binary));
+
         $this->skipIfVersionNotCompatible($version, $binary);
         $this->assertHeadersCompatibleWith(SDL2Image::create($version), $binary);
     }
