@@ -20,6 +20,31 @@ class BinaryCompatibilityTestCase extends TestCase
 {
     private const DIR_STORAGE = __DIR__ . '/storage';
 
+    protected function skipIfVersionNotCompatible(Version $version, string $binary): void
+    {
+        $this->skipIfNoFFISupport();
+
+        $ffi = \FFI::cdef(<<<'CPP'
+        typedef struct SDL_version {
+            uint8_t major;
+            uint8_t minor;
+            uint8_t patch;
+        } SDL_version;
+
+        extern const SDL_version * IMG_Linked_Version(void);
+        CPP, $binary);
+
+        $ver = $ffi->IMG_Linked_Version();
+        $actual = \sprintf('%d.%d.%d', $ver->major, $ver->minor, $ver->patch);
+
+        if (\version_compare($version->toString(), $actual, '>')) {
+            $message = 'Unable to check compatibility because the installed version of the '
+                . 'library (v%s) is lower than the tested headers (v%s)';
+
+            $this->markTestSkipped(\sprintf($message, $actual, $version->toString()));
+        }
+    }
+
     /**
      * @requires OSFAMILY Windows
      *
@@ -39,10 +64,9 @@ class BinaryCompatibilityTestCase extends TestCase
                 ->extract('SDL2_image.dll', self::DIR_STORAGE . '/SDL2_image.dll');
         }
 
-        $this->assertHeadersCompatibleWith(
-            SDL2Image::create($version),
-            self::DIR_STORAGE . '/SDL2_image.dll'
-        );
+        $binary = self::DIR_STORAGE . '/SDL2_image.dll';
+        $this->skipIfVersionNotCompatible($version, $binary);
+        $this->assertHeadersCompatibleWith(SDL2Image::create($version), $binary);
     }
 
     /**
@@ -56,10 +80,9 @@ class BinaryCompatibilityTestCase extends TestCase
             $this->markTestSkipped('sdl2_image not installed');
         }
 
-        $this->assertHeadersCompatibleWith(
-            SDL2Image::create($version),
-            Locator::resolve('libSDL2_image-2.0.0.dylib')
-        );
+        $binary = Locator::resolve('libSDL2_image-2.0.0.dylib');
+        $this->skipIfVersionNotCompatible($version, $binary);
+        $this->assertHeadersCompatibleWith(SDL2Image::create($version), $binary);
     }
 
     /**
@@ -73,9 +96,8 @@ class BinaryCompatibilityTestCase extends TestCase
             $this->markTestSkipped('sdl2_image not installed');
         }
 
-        $this->assertHeadersCompatibleWith(
-            SDL2Image::create($version),
-            Locator::resolve('libSDL2_image-2.0.so.0')
-        );
+        $binary = Locator::resolve('libSDL2_image-2.0.so.0');
+        $this->skipIfVersionNotCompatible($version, $binary);
+        $this->assertHeadersCompatibleWith(SDL2Image::create($version), $binary);
     }
 }
